@@ -1,573 +1,472 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wedding Card</title>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            min-height: 100vh;
-            background: url('background.jpg') center center/cover no-repeat fixed;
-            overflow: hidden;
-            position: relative;
-            font-family: 'Montserrat', sans-serif;
-        }
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(to bottom, #0a1931bb 30%, #185adb77 100%);
-            z-index: 1;
-            pointer-events: none;
-            opacity: 0.5;
-        }
-        .lights {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 120px;
-            z-index: 2;
-            pointer-events: none;
-        }
-        .light {
-            position: absolute;
-            width: 18px;
-            height: 18px;
-            background: radial-gradient(circle, #fff 60%, #ffd700 100%);
-            border-radius: 50%;
-            box-shadow: 0 0 16px 6px #ffd70088;
-            animation: light-blink 2s infinite alternate;
-        }
-        @keyframes light-blink {
-            0% { opacity: 1; }
-            100% { opacity: 0.7; }
-        }
-        /* Envelope styles */
-        .envelope-container {
-            width: 420px;
-            height: 320px;
-            margin: 0 auto;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            perspective: 1600px;
-            z-index: 10;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
-        .envelope {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            bottom: 0; left: 0;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: transform 1s cubic-bezier(.86,0,.07,1);
-        }
-        .envelope-front, .envelope-back {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0; left: 0;
-            backface-visibility: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-        }
-        .envelope-front {
-            background: linear-gradient(135deg, #101a2b 80%, #1e2e4d 100%);
-            border-radius: 0 0 36px 36px/0 0 60px 60px;
-            border: 2.5px solid #11235a;
-            box-shadow: 0 8px 32px 0 #000a, 0 1.5px 8px #185adb55;
-            z-index: 2;
-        }
-        .envelope-front .family-name {
-            font-family: 'Great Vibes', cursive;
-            font-size: 2.2rem;
-            color: #ffd700;
-            margin-bottom: 38px;
-            margin-top: 60px;
-            letter-spacing: 2px;
-            text-shadow: 0 2px 8px #000a;
-        }
-        .envelope-back {
-            background: linear-gradient(135deg, #101a2b 80%, #1e2e4d 100%);
-            border-radius: 0 0 36px 36px/0 0 60px 60px;
-            border: 2.5px solid #11235a;
-            box-shadow: 0 8px 32px 0 #000a, 0 1.5px 8px #185adb55;
-            z-index: 2;
-            transform: rotateY(180deg);
-        }
-        .envelope.flipped {
-            transform: rotateY(180deg);
-        }
-        .envelope-flap {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%;
-            height: 48%;
-            background: linear-gradient(135deg, #1a223a 80%, #2b3a5a 100%);
-            clip-path: polygon(0 0, 100% 0, 50% 100%);
-            z-index: 3;
-            transition: transform 1s cubic-bezier(.86,0,.07,1);
-            box-shadow: 0 6px 24px #0007;
-        }
-        .envelope.opened .envelope-flap {
-            transform: rotateX(-120deg);
-            transition: transform 1s cubic-bezier(.86,0,.07,1);
-        }
-        .envelope-seal {
-            position: absolute;
-            top: 46%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px; height: 60px;
-            background: radial-gradient(circle, #ffd700 70%, #bfa100 100%);
-            border-radius: 50%;
-            box-shadow: 0 0 12px 4px #ffd70088;
-            border: 3px solid #fff;
-            z-index: 4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Great Vibes', cursive;
-            font-size: 2rem;
-            color: #0a1931;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: box-shadow 0.3s;
-        }
-        .envelope-seal:hover {
-            box-shadow: 0 0 24px 8px #ffd700cc;
-        }
-        /* Card styles */
-        .card-container {
-            width: 370px;
-            height: 270px;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%) scale(0.8);
-            z-index: 15;
-            perspective: 1200px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.7s, transform 0.7s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .card-container.visible {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translate(-50%, -50%) scale(1);
-        }
-        .card {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: 
-                transform 0.8s cubic-bezier(.86,0,.07,1),
-                box-shadow 0.4s;
-            box-shadow: 0 8px 32px 0 #000a, 0 1.5px 8px #185adb55;
-            cursor: pointer;
-            background: linear-gradient(135deg, #101a2b 80%, #1e2e4d 100%);
-        }
-        .card.flipped {
-            transform: rotateY(180deg);
-        }
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 24px;
-            background: linear-gradient(135deg, #101a2b 80%, #1e2e4d 100%);
-            box-shadow: 0 2px 16px #0008;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            padding: 28px 18px;
-            box-sizing: border-box;
-            border: 2.5px solid #ffd700;
-            filter: brightness(1.05) contrast(1.12) blur(0.1px);
-        }
-        .card-face.front {
-            background-image: repeating-linear-gradient(135deg, #101a2b 0 2px, #1e2e4d 2px 4px);
-            background-blend-mode: multiply;
-        }
-        .card-face.back {
-            transform: rotateY(180deg);
-            background: linear-gradient(120deg, #1e2e4d 80%, #185adb 100%);
-        }
-        .card-title {
-            font-family: 'Great Vibes', cursive;
-            font-size: 2rem;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-            color: #fff;
-            text-shadow: 0 2px 8px #000a, 0 0px 2px #ffd700;
-        }
-        .card-details {
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            color: #fff;
-            text-shadow: 0 2px 8px #000a;
-            text-align: center;
-        }
-        .card-date {
-            font-size: 1.2rem;
-            color: #ffd700;
-            margin-bottom: 8px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 8px #000a;
-        }
-        .card-footer {
-            font-size: 1rem;
-            color: #ffd700;
-            margin-top: 10px;
-            font-family: 'Great Vibes', cursive;
-            text-shadow: 0 2px 8px #000a;
-        }
-        .card-image {
-            width: 100%;
-            height: 110px;
-            border-radius: 16px;
-            object-fit: cover;
-            margin-bottom: 10px;
-            border: 2px solid #fffacd;
-            box-shadow: 0 2px 12px #0005;
-        }
-        /* Side menu */
-        .side-menu {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 90px;
-            height: 100vh;
-            background: rgba(10,25,49,0.92);
-            box-shadow: 2px 0 16px #0006;
-            z-index: 20;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 60px;
-            gap: 30px;
-        }
-        .side-menu.visible {
-            display: flex;
-        }
-        .menu-card {
-            width: 60px;
-            height: 80px;
-            background: linear-gradient(135deg, #101a2b 80%, #1e2e4d 100%);
-            border-radius: 10px;
-            border: 2px solid #ffd700;
-            box-shadow: 0 2px 8px #0006;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.2s, border 0.2s;
-            position: relative;
-        }
-        .menu-card.selected, .menu-card:hover {
-            transform: scale(1.08);
-            border: 2.5px solid #fffacd;
-        }
-        .menu-card span {
-            font-size: 1.1rem;
-            color: #fff;
-            font-family: 'Montserrat', sans-serif;
-            margin-top: 6px;
-            text-align: center;
-            text-shadow: 0 2px 8px #000a;
-        }
-        .menu-card img {
-            width: 90%;
-            height: 55%;
-            border-radius: 6px;
-            object-fit: cover;
-            margin-top: 5px;
-        }
-        /* Responsive */
-        @media (max-width: 900px) {
-            .envelope-container {
-                width: 95vw;
-                height: 220px;
-            }
-            .card-container {
-                width: 90vw;
-                height: 180px;
-            }
-        }
-        @media (max-width: 700px) {
-            .envelope-container {
-                width: 98vw;
-                height: 180px;
-            }
-            .card-container {
-                width: 95vw;
-                height: 150px;
-            }
-            .side-menu {
-                width: 60px;
-                padding-top: 20px;
-                gap: 18px;
-            }
-            .menu-card {
-                width: 38px;
-                height: 48px;
-                font-size: 0.8rem;
-            }
-            .menu-card span {
-                font-size: 0.8rem;
-            }
-        }
-        @media (max-width: 500px) {
-            .envelope-container {
-                width: 99vw;
-                height: 120px;
-            }
-            .card-container {
-                width: 98vw;
-                height: 110px;
-            }
-            .card-face {
-                padding: 8px 2px;
-            }
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Rajat ❤️ Kanika — Wedding Invitation</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --gold: #ffd700;
+  --gold-soft: #ffdf00;
+  --bg-dark: #0d1423;
+  --menu-bg: rgba(8,12,24,0.55);
+}
+
+/* Base */
+html,body{height:100%;margin:0;padding:0}
+body{
+  font-family:'Montserrat',sans-serif;
+  background: url('background.jpg') center/cover no-repeat fixed;
+  color:#fff;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* overlay */
+.overlay{
+  position:fixed; inset:0;
+  background: radial-gradient(circle at center, rgba(10,15,25,0.55) 0%, rgba(10,12,20,0.9) 100%);
+  z-index:1;
+}
+
+/* canvas (petals/confetti) - put above overlay but under card */
+canvas#confettiCanvas{ position:fixed; inset:0; z-index:4; pointer-events:none; }
+
+/* hearts (decor) - put above overlay but under card */
+.heart{ position:absolute; width:18px; height:18px; transform:rotate(45deg); background:#ff6699; opacity:0.9; filter:blur(.3px); z-index:4; }
+.heart::before,.heart::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#ff6699}
+.heart::before{top:-9px;left:0} .heart::after{left:-9px;top:0}
+@keyframes floaty { 0%{ transform: translateY(100vh) rotate(45deg) scale(.85); opacity:0.8 } 100%{ transform: translateY(-10vh) rotate(45deg) scale(1.05); opacity:0 } }
+
+/* envelope */
+.envelope-container{ position:fixed; left:50%; top:8%; transform:translate(-50%,-8%); perspective:1600px; z-index:6; display:flex; align-items:flex-end; justify-content:center; width:86vw; max-width:520px; transition:top .3s ease, opacity .35s ease, transform .35s ease; }
+.envelope-container.hidden { opacity:0; transform: translate(-50%,-8%) scale(.94); pointer-events:none; } /* hidden after seal click */
+.envelope{ top: 200px; width:86vw; max-width:480px; height:220px; max-height:320px; position:relative; transform-style:preserve-3d; transition: transform .9s cubic-bezier(.22,.9,.3,1); }
+.envelope-front, .envelope-back { position:absolute; inset:0; background: linear-gradient(135deg, #3b2e2e, #1e1b1b); border-radius:16px; border:3px solid var(--gold); box-shadow: 0 8px 28px rgba(0,0,0,.6), 0 2px 12px rgba(255,215,0,.12); display:flex; align-items:center; justify-content:center; flex-direction:column; backface-visibility: hidden; }
+.envelope-back{ transform: rotateY(180deg) }
+.envelope-flap{ position:absolute; top:0; left:0; width:100%; height:46%; background: linear-gradient(135deg,#162240 60%, #1e3160 100%); clip-path: polygon(0 0,100% 0,50% 100%); transform-origin: top; box-shadow: 0 6px 24px rgba(0,0,0,.45); transition: transform 1s cubic-bezier(.22,.9,.3,1); z-index:4; }
+.envelope.opened .envelope-flap{ visibility: hidden; transform: rotateX(-120deg) }
+.envelope-front h1{ margin:0; font-family:'Great Vibes',cursive; font-size:2.2rem; color:var(--gold); text-shadow:0 4px 12px rgba(0,0,0,.6); pointer-events:none; text-align:center; padding:6px 10px; }
+
+/* seal */
+.envelope-seal{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1); width:64px; height:64px; background: radial-gradient(circle,#ffd700 60%, #b38f00 100%); border-radius:50%; border:3px solid #fff; display:flex; align-items:center; justify-content:center; font-size:1.5rem; cursor:pointer; box-shadow: 0 0 22px rgba(255,215,0,.85); transition: transform .18s ease, box-shadow .18s ease; z-index:7; }
+.envelope-seal:hover{ transform:translate(-50%,-50%) scale(1.08); box-shadow:0 0 36px rgba(255,215,0,1) }
+.envelope-seal:active{ transform:translate(-50%,-50%) scale(.92) }
+.envelope-seal.pop { animation: pop-seal .33s ease forwards; }
+@keyframes pop-seal { 0%{ transform: translate(-50%,-50%) scale(1.05) } 40%{ transform: translate(-50%,-50%) scale(1.22) } 100%{ transform: translate(-50%,-50%) scale(1) } }
+
+/* card container - made narrower so background is visible behind sides */
+.card-container{ position:fixed; left:50%; top:48%; transform:translate(-50%,-48%) scale(.98); width:78vw; max-width:420px; height:62vh; max-height:700px; opacity:0; pointer-events:none; transition:all .5s ease; z-index:10; display:flex; align-items:center; justify-content:center; }
+.card-container.visible{ opacity:1; transform:translate(-50%,-48%) scale(1); pointer-events:auto; }
+
+/* card */
+.card{ width:100%; height:100%; border-radius:14px; overflow:hidden; background: linear-gradient(145deg,#0f182d,#1a2950); border:2px solid var(--gold); box-shadow: 0 10px 40px rgba(0,0,0,.6), 0 6px 18px rgba(255,215,0,.06); display:flex; flex-direction:column; padding:8px; transform-style:preserve-3d; }
+.card.flipped{ transform: rotateY(180deg) }
+
+/* faces */
+.card-face{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; padding:12px; text-align:center; backface-visibility:hidden; gap:8px; }
+.card-face.back{ transform:rotateY(180deg); background:linear-gradient(120deg,#1e2e4d 80%, #185adb 100%); align-items:center; justify-content:center; padding:18px; }
+
+/* front */
+.front{ display:flex; flex-direction:column; align-items:stretch; }
+
+/* image */
+.card-image{ width:100%; height:36%; min-height:120px; max-height:240px; object-fit:cover; object-position:center; border-radius:10px; box-shadow: 0 8px 26px rgba(0,0,0,.5); flex-shrink:0; margin-bottom:8px; transition: transform .35s ease; }
+.card-image:hover{ transform: scale(1.02) }
+
+/* body */
+.card-body{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:6px 6px 4px;
+  flex:1 1 auto;
+  min-height: 0;
+}
+
+/* title */
+.card-title{ font-family:'Great Vibes',cursive; font-size:2rem; color:var(--gold); text-shadow:0 3px 10px rgba(0,0,0,.6); margin:0; line-height:1; text-align:center; }
+.card-subtitle{ font-family:'Great Vibes',cursive; font-size:1.5rem; color:var(--gold-soft); margin:0; margin-top:2px; line-height:1.05; text-align:center; }
+
+/* details */
+.card-details{
+  font-size:0.98rem;
+  line-height:1.45;
+  color:#fff;
+  margin-top:6px;
+  text-align:center;
+  overflow:auto;
+  padding:6px;
+  word-wrap:break-word;
+  white-space:pre-wrap;
+  -webkit-overflow-scrolling: touch;
+  max-height:calc(62vh - 240px);
+  border-radius:8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+}
+
+/* date/footer */
+.card-date{ margin-top:6px; font-weight:700; color:var(--gold-soft) }
+.card-footer{ margin-top:8px; font-family:'Great Vibes',cursive; color:var(--gold) }
+
+/* back */
+.card-face.back .card-title{ font-size:1.6rem; margin-bottom:8px; }
+.card-face.back .card-details{ font-size:1rem; }
+
+/* bottom menu */
+.side-menu{
+  position:fixed; left:50%; bottom:12px; transform:translateX(-50%);
+  display:flex; flex-direction:row; gap:12px; z-index:12; opacity:0; transition:opacity .5s; padding:8px; background:var(--menu-bg); border-radius:14px; max-width:96vw; overflow-x:auto; -webkit-overflow-scrolling:touch;
+}
+.side-menu.visible{ opacity:1 }
+.menu-card{ flex:0 0 auto; width:86px; height:86px; border-radius:12px; overflow:hidden; cursor:pointer; border:2px solid var(--gold); background:rgba(10,18,35,.6); display:flex; align-items:center; justify-content:center; flex-direction:column; padding:6px; transition:transform .18s, box-shadow .18s; }
+.menu-card img{ width:100%; height:64%; object-fit:cover; border-radius:8px }
+.menu-card span{ font-size:.78rem; color:#fff; margin-top:6px; user-select:none; }
+.menu-card:hover{ transform:translateY(-3px) scale(1.02); box-shadow:0 6px 20px rgba(0,0,0,.45) }
+.menu-card.selected{ box-shadow:0 0 28px rgba(255,215,0,.95); transform:scale(1.02) }
+
+/* music control (if present) */
+.music-control{
+  position:fixed; right:14px; top:12px; z-index:20;
+  width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border:2px solid rgba(255,255,255,0.05); box-shadow:0 6px 20px rgba(0,0,0,.45); cursor:pointer;
+}
+.music-control svg{ width:22px; height:22px; fill:var(--gold); }
+
+/* small screens tweaks */
+@media (max-width:430px){
+  .envelope-container{ top:6% }
+  .envelope{ height:200px }
+  .envelope-front h1{ font-size:1.9rem }
+  .card-container{ top:52%; height:66vh; width:72vw; max-width:400px; }
+  .card-image{ height:26%; min-height:100px }
+  .card-details{ max-height:calc(66vh - 200px) }
+  .card-title{ font-size:1.8rem }
+  .card-subtitle{ font-size:1rem }
+  .menu-card{ width:76px; height:76px }
+  .music-control{ width:44px; height:44px; right:10px; top:10px }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; animation:none !important }
+}
+</style>
 </head>
 <body>
-    <div class="overlay"></div>
-    <div class="lights"></div>
-    <!-- Side menu -->
-    <div class="side-menu" id="sideMenu">
-        <div class="menu-card selected" data-card="haldi">
-            <img src="https://i.pinimg.com/1200x/21/2a/da/212ada5fff465a6c6226bbc944918ccf.jpg" alt="Haldi">
-            <span>Haldi</span>
-        </div>
-        <div class="menu-card" data-card="mehandi">
-            <img src="mehandi.jpg" alt="Mehandi">
-            <span>Mehandi</span>
-        </div>
-        <div class="menu-card" data-card="bhat">
-            <img src="bhat.jpg" alt="Bhat">
-            <span>Bhat</span>
-        </div>
-        <div class="menu-card" data-card="mahila">
-            <img src="mahila.jpg" alt="Mahila Sangeet">
-            <span>Mahila</span>
-        </div>
-        <div class="menu-card" data-card="wedding">
-            <img src="wedding.jpg" alt="Wedding">
-            <span>Wedding</span>
-        </div>
-        <div class="menu-card" data-card="reception">
-            <img src="reception.jpg" alt="Reception">
-            <span>Reception</span>
-        </div>
+  <div class="overlay" aria-hidden="true"></div>
+  <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+  <!-- floating hearts -->
+  <script>
+    (function addHearts(){
+      if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      for(let i=0;i<14;i++){
+        const h=document.createElement('div');
+        h.className='heart';
+        h.style.left = (Math.random()*92) + 'vw';
+        h.style.top = (Math.random()*100) + 'vh';
+        h.style.animation = `floaty ${6 + Math.random()*8}s linear infinite`;
+        h.style.opacity = 0.35 + Math.random()*0.65;
+        document.body.appendChild(h);
+      }
+    })();
+  </script>
+
+  <!-- Envelope -->
+  <div class="envelope-container" id="envelopeContainer" role="region" aria-label="Invitation envelope">
+    <div class="envelope" id="envelope">
+      <div class="envelope-flap" aria-hidden="true"></div>
+      <div class="envelope-front">
+        <h1>Rajat ❤️ Kanika</h1>
+        <button id="seal" class="envelope-seal" aria-label="Open invitation">💍</button>
+      </div>
+      <div class="envelope-back" aria-hidden="true"></div>
     </div>
-    <!-- Envelope and card -->
-    <div class="envelope-container">
-        <div class="envelope" id="envelope">
-            <div class="envelope-flap" id="envelopeFlap"></div>
-            <div class="envelope-front" id="envelopeFront">
-                <div class="family-name">Maheshwari's</div>
-                <div class="envelope-seal" id="envelopeSeal">💍</div>
-            </div>
-            <div class="envelope-back" id="envelopeBack"></div>
+  </div>
+
+  <!-- Card -->
+  <div class="card-container" id="cardContainer" aria-hidden="true">
+    <div class="card" id="card" role="article" aria-live="polite">
+      <!-- FRONT -->
+      <div class="card-face front" aria-hidden="false">
+        <img id="mainImage" class="card-image" src="haldi.jpg" alt="Event image" loading="lazy">
+        <div class="card-body">
+          <h2 class="card-title" id="cardTitle">Rajat ❤️ Kanika</h2>
+          <h3 class="card-subtitle" id="cardSubtitle">Haldi Ceremony</h3>
+          <div class="card-details" id="mainDetails">Join us for the vibrant Haldi ceremony filled with laughter, color, and joy!</div>
+          <div class="card-date" id="mainDate">February 11, 2025 | Abhinandan, Jaipur</div>
+          <div class="card-footer" id="mainFooter">Let the festivities begin!</div>
         </div>
-        <div class="card-container" id="cardContainer">
-            <div class="card" id="weddingCard">
-                <div class="card-face front">
-                    <img src="https://i.pinimg.com/1200x/21/2a/da/212ada5fff465a6c6226bbc944918ccf.jpg" alt="Event" class="card-image" id="mainCardImage">
-                    <div class="card-title" id="mainCardTitle">Haldi</div>
-                    <div class="card-details" id="mainCardDetails">
-                        Join us for the vibrant Haldi ceremony!<br>
-                        <span class="card-date">December 10, 2025</span>
-                        <br>
-                        At Family Courtyard, Dream City
-                    </div>
-                    <div class="card-footer" id="mainCardFooter">Let the festivities begin!</div>
-                </div>
-                <div class="card-face back">
-                    <div class="card-title">You're Invited!</div>
-                    <div class="card-details">
-                        Ceremony: 10:00 AM<br>
-                        Dress Code: Yellow
-                    </div>
-                    <div class="card-footer">We hope to see you there!</div>
-                </div>
-            </div>
-        </div>
+      </div>
+
+      <!-- BACK -->
+      <div class="card-face back" aria-hidden="true">
+        <div class="card-title">You're Invited!</div>
+        <div class="card-details" id="backDetails">Ceremony: 10:00 AM<br>Dress Code: Yellow</div>
+        <div class="card-footer" id="backFooter">We hope to see you there!</div>
+      </div>
     </div>
-    <script>
-        // Decorative lights
-        const lights = document.querySelector('.lights');
-        for (let i = 0; i < 18; i++) {
-            const light = document.createElement('div');
-            light.className = 'light';
-            light.style.left = (5 + i * 5.2) + 'vw';
-            light.style.top = (Math.sin(i/2) * 18 + 40) + 'px';
-            light.style.background = `radial-gradient(circle, #fff 60%, ${['#ffd700','#ffb347','#fffacd','#fff'][i%4]} 100%)`;
-            light.style.animationDelay = (Math.random() * 2) + 's';
-            lights.appendChild(light);
-        }
+  </div>
 
-        // Card data for each event
-        const cardData = {
-            haldi: {
-                img: "haldi.jpg",
-                title: "Haldi",
-                details: `Join us for the vibrant Haldi ceremony!<br>
-                        <span class="card-date">December 10, 2025</span>
-                        <br>
-                        At Family Courtyard, Dream City`,
-                footer: "Let the festivities begin!",
-                back: {
-                    details: "Ceremony: 10:00 AM<br>Dress Code: Yellow",
-                    footer: "We hope to see you there!"
-                }
-            },
-            mehandi: {
-                img: "mehandi.jpg",
-                title: "Mehandi",
-                details: `Celebrate the colors of Mehandi night!<br>
-                        <span class="card-date">December 10, 2025</span>
-                        <br>
-                        At Family Courtyard, Dream City`,
-                footer: "Henna & happiness!",
-                back: {
-                    details: "Ceremony: 5:00 PM<br>Dress Code: Green",
-                    footer: "Join the fun!"
-                }
-            },
-            bhat: {
-                img: "bhat.jpg",
-                title: "Bhat",
-                details: `Traditional Bhat ceremony with family.<br>
-                        <span class="card-date">December 11, 2025</span>
-                        <br>
-                        At Family Courtyard, Dream City`,
-                footer: "Tradition & togetherness.",
-                back: {
-                    details: "Ceremony: 11:00 AM<br>Dress Code: Ethnic",
-                    footer: "Blessings welcome!"
-                }
-            },
-            mahila: {
-                img: "mahila.jpg",
-                title: "Mahila Sangeet",
-                details: `Music, dance & joy at Mahila Sangeet!<br>
-                        <span class="card-date">December 11, 2025</span>
-                        <br>
-                        At Banquet Hall, Dream City`,
-                footer: "Dance the night away!",
-                back: {
-                    details: "Ceremony: 7:00 PM<br>Dress Code: Colorful",
-                    footer: "Let’s celebrate!"
-                }
-            },
-            wedding: {
-                img: "wedding.jpg",
-                title: "Wedding",
-                details: `Yuvraj & Priya invite you to their wedding<br>
-                        <span class="card-date">December 12, 2025</span>
-                        <br>
-                        At Moonlit Garden, Dream City`,
-                footer: "With love & joy",
-                back: {
-                    details: "Ceremony: 7:00 PM<br>Dress Code: Elegant",
-                    footer: "We hope to see you there!"
-                }
-            },
-            reception: {
-                img: "reception.jpg",
-                title: "Reception",
-                details: `Celebrate the new beginning at Reception!<br>
-                        <span class="card-date">December 13, 2025</span>
-                        <br>
-                        At Grand Ballroom, Dream City`,
-                footer: "Cheers to forever!",
-                back: {
-                    details: "Ceremony: 8:30 PM<br>Dress Code: Formal",
-                    footer: "Celebrate with us!"
-                }
-            }
-        };
+  <!-- bottom menu -->
+  <div class="side-menu" id="menu" aria-label="Events menu">
+    <div class="menu-card selected" data-key="haldi" tabindex="0"><img src="https://i.pinimg.com/736x/8a/29/c9/8a29c96147b4d4125d7ae5e77b45c4e1.jpg" alt=""><span>Haldi</span></div>
+    <div class="menu-card" data-key="mehandi" tabindex="0"><img src="https://i.pinimg.com/736x/2c/ac/2c/2cac2c29d301e5861cd5856544615342.jpg" alt=""><span>Mehandi</span></div>
+    <div class="menu-card" data-key="bhat" tabindex="0"><img src="https://i.pinimg.com/736x/a0/5f/be/a05fbeb9b90dfffd981923993e05c9bf.jpg" alt=""><span>Bhat</span></div>
+    <div class="menu-card" data-key="sangeet" tabindex="0"><img src="https://i.pinimg.com/736x/a9/85/81/a985811e8fd6b4825da0c84d3c558264.jpg" alt=""><span>Sangeet</span></div>
+    <div class="menu-card" data-key="wedding" tabindex="0"><img src="https://i.pinimg.com/736x/7d/66/48/7d6648773f877350e9d5c9bd633b82f8.jpg" alt=""><span>Wedding</span></div>
+    <div class="menu-card" data-key="reception" tabindex="0"><img src="https://i.pinimg.com/736x/0b/fa/53/0bfa53e6f1ffe58e30507d63ea3077e2.jpg" alt=""><span>Reception</span></div>
+  </div>
 
-        // Envelope logic
-        const envelope = document.getElementById('envelope');
-        const envelopeFlap = document.getElementById('envelopeFlap');
-        const envelopeFront = document.getElementById('envelopeFront');
-        const envelopeBack = document.getElementById('envelopeBack');
-        const seal = document.getElementById('envelopeSeal');
-        const cardContainer = document.getElementById('cardContainer');
-        const sideMenu = document.getElementById('sideMenu');
-        const card = document.getElementById('weddingCard');
-        const mainCardImage = document.getElementById('mainCardImage');
-        const mainCardTitle = document.getElementById('mainCardTitle');
-        const mainCardDetails = document.getElementById('mainCardDetails');
-        const mainCardFooter = document.getElementById('mainCardFooter');
-        const mainCardBackDetails = card.querySelector('.card-face.back .card-details');
-        const mainCardBackFooter = card.querySelector('.card-face.back .card-footer');
+  <!-- audio -->
+  <audio id="bgMusic" src="romantic.mp3" loop preload="auto"></audio>
 
-        // Step 1: Show envelope front with family name and seal
-        // Step 2: On seal click, flip envelope to back (simulate flip), then open flap, then show cards and menu
+<script>
+/* DOM refs */
+const seal = document.getElementById('seal');
+const envelope = document.getElementById('envelope');
+const envelopeContainer = document.getElementById('envelopeContainer');
+const cardContainer = document.getElementById('cardContainer');
+const card = document.getElementById('card');
+const menu = document.getElementById('menu');
+const bgMusic = document.getElementById('bgMusic');
+const canvas = document.getElementById('confettiCanvas');
+const ctx = canvas.getContext('2d');
 
-        seal.addEventListener('click', () => {
-            envelope.classList.add('flipped');
-            setTimeout(() => {
-                envelope.classList.add('opened');
-                setTimeout(() => {
-                    cardContainer.classList.add('visible');
-                    sideMenu.classList.add('visible');
-                }, 900);
-            }, 700);
-        });
+/* detect preferences */
+const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        // Card flip logic
-        card.addEventListener('click', () => {
-            if (!cardContainer.classList.contains('visible')) return;
-            card.classList.toggle('flipped');
-        });
+/* keys */
+const keys = Array.from(document.querySelectorAll('.menu-card')).map(el => el.dataset.key);
+let currentIndex = 0;
 
-        // Side menu logic
-        const menuCards = document.querySelectorAll('.menu-card');
-        menuCards.forEach(menu => {
-            menu.addEventListener('click', function() {
-                // Remove selected from all
-                menuCards.forEach(m => m.classList.remove('selected'));
-                this.classList.add('selected');
-                // Get card data
-                const key = this.getAttribute('data-card');
-                const data = cardData[key];
-                // Update card front
-                mainCardImage.src = data.img;
-                mainCardImage.alt = data.title;
-                mainCardTitle.textContent = data.title;
-                mainCardDetails.innerHTML = data.details;
-                mainCardFooter.textContent = data.footer;
-                // Update card back
-                mainCardBackDetails.innerHTML = data.back.details;
-                mainCardBackFooter.textContent = data.back.footer;
-                // Always show front when switching
-                card.classList.remove('flipped');
-            });
-        });
-    </script>
+/* data */
+const cardData = {
+  haldi: {
+    img: 'https://i.pinimg.com/736x/8a/29/c9/8a29c96147b4d4125d7ae5e77b45c4e1.jpg',
+    title: 'Rajat ❤️ Kanika',
+    subtitle: 'Haldi Ceremony',
+    details: 'Join us as Rajat and Kanika are adorned with turmeric blessings! ',
+    date: 'February 11, 2025 | Abhinandan, Jaipur',
+    footer: 'Let the festivities begin for Rajat & Kanika!',
+    back: 'Ceremony: 10:00 AM<br>Dress Code: Yellow'
+  },
+  mehandi: {
+    img: 'https://i.pinimg.com/736x/2c/ac/2c/2cac2c29d301e5861cd5856544615342.jpg',
+    title: 'Rajat ❤️ Kanika',
+    subtitle: 'Mehandi Night',
+    details: 'Celebrate the colors of love with Rajat & Kanika at their beautiful Mehandi night!',
+    date: 'February 10, 2025 | Bloom Garden, Dream City',
+    footer: 'Henna & happiness for the couple!',
+    back: 'Ceremony: 5:00 PM<br>Dress Code: Green'
+  },
+  bhat: {
+    img: 'https://i.pinimg.com/736x/a0/5f/be/a05fbeb9b90dfffd981923993e05c9bf.jpg',
+    title: 'Rajat ❤️ Kanika',
+    subtitle: 'Bhat Ceremony',
+    details: 'Traditional family Bhat ceremony with love and blessings for Rajat & Kanika.',
+    date: 'February 11, 2025 | Family Courtyard, Dream City',
+    footer: 'Tradition & togetherness for the happy couple.',
+    back: 'Ceremony: 11:00 AM<br>Dress Code: Ethnic'
+  },
+  sangeet: {
+    img: 'https://i.pinimg.com/736x/6a/fb/12/6afb12b8e59d9964c3f6af7a01167e98.jpg',
+    title: 'Rajat ❤️ Kanika',
+    subtitle: 'Sangeet',
+    details: 'An evening of music, dance, and joy celebrating Rajat & Kanika!',
+    date: 'December 12, 2025 | Rhythm Hall, Dream City',
+    footer: 'Dance the night away for our lovely couple!',
+    back: 'Ceremony: 7:00 PM<br>Dress Code: Colorful'
+  },
+  wedding: {
+    img: 'https://i.pinimg.com/736x/7d/66/48/7d6648773f877350e9d5c9bd633b82f8.jpg',
+    title: 'Rajat ❤️ Kanika',
+    subtitle: 'Wedding',
+    details: 'With blessings from families, Rajat & Kanika unite in love and happiness.',
+    date: 'December 13, 2025 | Moonlit Garden, Dream City',
+    footer: 'A magical day celebrating Rajat & Kanika 💞',
+    back: 'Ceremony: 7:00 PM<br>Dress Code: Elegant'
+  },
+  reception: {
+    img: 'https://i.pinimg.com/736x/0b/fa/53/0bfa53e6f1ffe58e30507d63ea3077e2.jpg',
+    title: 'Rajat ❤️ Kanika',
+    subtitle: 'Reception Party',
+    details: 'Celebrate the joyous new chapter of Rajat & Kanika with family, friends, love, and laughter!',
+    date: 'December 14, 2025 | Grand Ballroom, Dream City',
+    footer: 'Cheers to forever with Rajat & Kanika! 🥂',
+    back: 'Ceremony: 8:30 PM<br>Dress Code: Formal'
+  }
+};
+
+/* DOM nodes to update */
+const mainImage = document.getElementById('mainImage');
+const cardTitle = document.getElementById('cardTitle');
+const cardSubtitle = document.getElementById('cardSubtitle');
+const mainDetails = document.getElementById('mainDetails');
+const mainDate = document.getElementById('mainDate');
+const mainFooter = document.getElementById('mainFooter');
+const backDetails = document.getElementById('backDetails');
+
+/* set card */
+function markSelected(key){
+  document.querySelectorAll('.menu-card').forEach(mc=>{
+    const on = mc.dataset.key === key;
+    mc.classList.toggle('selected', on);
+    mc.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+function setCard(key){
+  if(!cardData[key]) return;
+  const d = cardData[key];
+  mainImage.src = d.img;
+  mainImage.alt = `${d.subtitle} image`;
+  cardTitle.textContent = d.title;
+  cardSubtitle.textContent = d.subtitle;
+  mainDetails.innerHTML = d.details;
+  mainDate.textContent = d.date;
+  mainFooter.textContent = d.footer;
+  backDetails.innerHTML = d.back;
+  markSelected(key);
+  currentIndex = keys.indexOf(key);
+}
+
+/* initial */
+setCard(keys[0]);
+
+/* seal click: open envelope, hide envelope container, reveal card, start music & confetti */
+seal.addEventListener('click', () => {
+  seal.classList.add('pop'); setTimeout(()=>seal.classList.remove('pop'),420);
+  envelope.classList.add('opened');
+
+  // hide envelope container smoothly (so hearts & petals behind are visible)
+  setTimeout(()=> {
+    envelopeContainer.classList.add('hidden');
+  }, 220); // small delay so flap animation begins then container fades
+
+  document.querySelector('.overlay').style.background = 'radial-gradient(circle at center, rgba(10,12,20,0.35) 0%, rgba(10,12,20,0.75) 100%)';
+  setTimeout(()=>{ cardContainer.classList.add('visible'); menu.classList.add('visible'); startConfetti(); }, 520);
+
+  // delayed fade-in music (1 second)
+  setTimeout(()=>{
+    const targetVol = 0.38;
+    bgMusic.volume = 0;
+    bgMusic.play().catch(()=>{ /* blocked */ });
+    const steps = 18;
+    let step = 0;
+    const volStep = targetVol / steps;
+    const interval = 1000 / steps;
+    const fade = setInterval(()=>{
+      step++; bgMusic.volume = Math.min(targetVol, bgMusic.volume + volStep);
+      if(step >= steps) clearInterval(fade);
+    }, interval);
+  }, 1000);
+});
+
+/* flip card on tap (ignore taps on controls) */
+card.addEventListener('click', (e) => {
+  const ignore = e.target.closest('.menu-card') || e.target.closest('.music-control') || e.target.closest('#seal');
+  if(ignore) return;
+  card.classList.toggle('flipped');
+});
+
+/* menu clicks */
+document.querySelectorAll('.menu-card').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const key = el.dataset.key;
+    setCard(key);
+    card.classList.remove('flipped');
+    el.focus();
+  });
+  el.addEventListener('keydown', (ev)=>{ if(ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); el.click(); } });
+});
+
+/* swipe navigation for mobile */
+let touchStartX = 0, touchStartY = 0;
+card.addEventListener('touchstart', (e)=> {
+  if(e.touches && e.touches[0]){ touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; }
+});
+card.addEventListener('touchend', (e)=> {
+  if(!e.changedTouches || !e.changedTouches[0]) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)){
+    if(dx < 0) showNext(); else showPrev();
+  }
+});
+function showNext(){ currentIndex = (currentIndex + 1) % keys.length; setCard(keys[currentIndex]); }
+function showPrev(){ currentIndex = (currentIndex - 1 + keys.length) % keys.length; setCard(keys[currentIndex]); }
+
+/* Confetti / Particles (same optimized logic) */
+let DPR = window.devicePixelRatio || 1;
+function resizeCanvas(){ DPR = window.devicePixelRatio || 1; canvas.width = Math.floor(window.innerWidth * DPR); canvas.height = Math.floor(window.innerHeight * DPR); canvas.style.width = window.innerWidth + 'px'; canvas.style.height = window.innerHeight + 'px'; ctx.setTransform(DPR,0,0,DPR,0,0); }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+let particles = [], confettiRunning=false, animId=null, fadeStartTime=null;
+const FADE_DURATION = 12000;
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function createParticle(){ const colors=['#FFD700','#FF69B4','#FFB6C1','#FFA500']; return { x: rand(0, window.innerWidth), y: rand(-window.innerHeight, 0), vx: rand(-0.6, 0.6), vy: rand(0.6, 2.2), size: rand(7, 16), color: colors[Math.floor(Math.random()*colors.length)], rot: rand(0, Math.PI*2), spin: rand(-0.06, 0.06), shape: Math.random() > 0.6 ? 'petal' : 'confetti' }; }
+function initParticles(n){ particles = []; for(let i=0;i<n;i++) particles.push(createParticle()); }
+function drawFrame(timestamp){
+  ctx.clearRect(0,0,canvas.width/DPR,canvas.height/DPR);
+  let alphaMul = 1;
+  if(fadeStartTime){ const elapsed = timestamp - fadeStartTime; alphaMul = 1 - Math.min(1, elapsed/FADE_DURATION); }
+  for(let p of particles){
+    p.x += p.vx; p.y += p.vy; p.rot += p.spin;
+    if(p.x < -50) p.x = window.innerWidth + 50;
+    if(p.x > window.innerWidth + 50) p.x = -50;
+    if(p.y > window.innerHeight + 80){
+      if(!fadeStartTime){ p.y = rand(-window.innerHeight, -20); p.x = rand(0, window.innerWidth); } else { p.y = window.innerHeight + 200; }
+    }
+    ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.globalAlpha = 0.95 * alphaMul;
+    if(p.shape === 'confetti'){ ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6); }
+    else{ ctx.beginPath(); ctx.fillStyle = p.color; ctx.ellipse(0,0,p.size*0.55,p.size,0,0,Math.PI*2); ctx.fill(); }
+    ctx.restore();
+  }
+  if(alphaMul <= 0.01){ cancelAnimationFrame(animId); animId = null; confettiRunning=false; ctx.clearRect(0,0,canvas.width/DPR,canvas.height/DPR); return; }
+  animId = requestAnimationFrame(drawFrame);
+}
+function startConfetti(){
+  if(reducedMotion) return;
+  if(confettiRunning) return;
+  confettiRunning = true;
+  fadeStartTime = null;
+  const base = window.innerWidth < 420 ? 40 : (window.innerWidth < 800 ? 70 : 110);
+  initParticles(base);
+  animId = requestAnimationFrame(drawFrame);
+  setTimeout(()=>{ fadeStartTime = performance.now(); }, 9000);
+}
+
+/* keyboard navigation accessibility */
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'ArrowRight') showNext();
+  if(e.key === 'ArrowLeft') showPrev();
+});
+
+/* double-tap to toggle music on touch devices */
+let lastTap = 0;
+card.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if(now - lastTap < 300){
+    if(bgMusic.paused) bgMusic.play().catch(()=>{});
+    else bgMusic.pause();
+  }
+  lastTap = now;
+});
+
+/* initial selected style */
+document.querySelectorAll('.menu-card').forEach((mc,i)=>{ mc.dataset.key = keys[i]; });
+markSelected(keys[0]);
+
+</script>
 </body>
 </html>
